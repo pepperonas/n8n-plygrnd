@@ -1,252 +1,219 @@
-# n8n Playground - Lead Generation System
+# n8n Workflows Playground
 
-Automated lead generation and email campaign system for identifying mid-sized businesses with high AI automation potential.
+Eine Sammlung von n8n-Automatisierungs-Workflows für verschiedene Business-Automatisierungsaufgaben. Jeder Workflow ist eigenständig und produktionsbereit.
 
-## 🎯 Overview
+## 🎯 Überblick
 
-This repository contains a complete B2B lead generation workflow that:
-- Searches for businesses using Google Places API
-- Scores leads based on automation potential (0-100 points)
-- Analyzes company websites for manual processes
-- Generates personalized outreach emails with GPT-4
-- Tracks campaigns and responses in PostgreSQL
-- Automates follow-up sequences
+Dieses Repository dient als Playground für die Entwicklung und das Testen mehrerer n8n-Automatisierungs-Workflows. Jedes Workflow-Verzeichnis enthält alles, was zum Deployment und zur Ausführung dieser spezifischen Automatisierung benötigt wird.
 
-## 📦 What's Included
+## 📦 Verfügbare Workflows
 
-### Implementation Options
+### 1. Lead Generator (`lead-generator/`)
 
-1. **n8n Visual Workflow** - Drag-and-drop automation (recommended for non-developers)
-2. **Python Standalone Script** - CLI tool that can run independently
-3. **REST API + Dashboard** - Flask API with real-time monitoring interface
+Automatisiertes B2B-Lead-Generierungs- und E-Mail-Kampagnensystem zur Identifizierung von Unternehmen mit hohem KI-Automatisierungspotenzial.
 
-### Key Features
+**Features**:
+- Google Places API Integration zur Unternehmensrecherche
+- Intelligentes Lead-Scoring (0-100 Punkte)
+- KI-gestützte E-Mail-Personalisierung mit GPT-4
+- Automatische Follow-up-Sequenzen
+- PostgreSQL Tracking und Analytics
+- DSGVO/UWG-konform
 
-- **Intelligent Lead Scoring**: Prioritizes high-value prospects based on industry, ratings, and online presence
-- **AI-Powered Personalization**: GPT-4 generates custom emails for each prospect
-- **Automated Follow-ups**: Sends up to 2 follow-up emails after 3 and 7 days
-- **Rate Limiting**: Respects best practices (max 20 emails/day with delays)
-- **Response Tracking**: Monitors open rates, responses, and conversions
-- **DSGVO Compliant**: Built-in opt-out and legal compliance features
+**Implementierungsoptionen**:
+- n8n visueller Workflow
+- Python Standalone-Skript
+- REST API + Dashboard
 
-## 🚀 Quick Start
+**Dokumentation**: Siehe [lead-generator/README.md](lead-generator/README.md) für vollständige Setup-Anleitung
 
-### Prerequisites
+**Quick Start**:
+```bash
+cd lead-generator
+./install.sh  # Automatisches Setup
+python lead_generation.py --campaign
+```
 
-- Python 3.8+
-- PostgreSQL database
-- n8n instance (for workflow option)
-- API keys: Google Maps, OpenAI, SMTP credentials
+---
+
+### 2. [Zukünftiger Workflow]
+
+Demnächst verfügbar...
+
+---
+
+### 3. [Zukünftiger Workflow]
+
+Demnächst verfügbar...
+
+## 🏗️ Projektstruktur
+
+```
+n8n-plygrnd/
+├── README.md                    # Diese Datei - Projektübersicht
+├── CLAUDE.md                    # Claude Code Entwicklungsanleitung
+├── package.json                 # Node.js Konfiguration
+├── index.js                     # Entry Point
+│
+├── lead-generator/              # Lead-Generierungs-Workflow
+│   ├── README.md               # Detaillierte Dokumentation
+│   ├── CLAUDE.md               # Workflow-spezifische Entwickleranleitung
+│   ├── neukoelln_lead_workflow.json
+│   ├── lead_generation.py
+│   ├── api.py
+│   ├── dashboard.html
+│   ├── database_schema.sql
+│   ├── requirements.txt
+│   ├── install.sh
+│   └── ...
+│
+├── [workflow-2]/                # Zukünftiger Workflow
+│   ├── README.md
+│   ├── CLAUDE.md
+│   └── ...
+│
+└── [workflow-3]/                # Zukünftiger Workflow
+    ├── README.md
+    ├── CLAUDE.md
+    └── ...
+```
+
+## 🚀 Erste Schritte
+
+### Voraussetzungen
+
+- **n8n**: Laufende Instanz (self-hosted oder cloud)
+- **Python 3.8+**: Für Standalone-Skripte
+- **PostgreSQL**: Datenbank für Datenpersistenz
+- **API Keys**: Variiert je Workflow (Google Maps, OpenAI, etc.)
 
 ### Installation
 
 ```bash
-# Clone repository
+# Repository klonen
 git clone https://github.com/pepperonas/n8n-plygrnd.git
 cd n8n-plygrnd
 
-# Navigate to lead generation project
+# Zum spezifischen Workflow navigieren
 cd lead-generator
 
-# Run automated setup (Linux/macOS)
-chmod +x install.sh
-./install.sh
+# Workflow-spezifische README.md befolgen
+```
 
-# Or manual setup:
+## 📖 Dokumentationsstruktur
+
+Jedes Workflow-Verzeichnis enthält:
+
+- **README.md** - Benutzerdokumentation mit Setup-Anweisungen
+- **CLAUDE.md** - Entwickleranleitung für Claude Code mit technischen Details
+- **Workflow-Dateien** - n8n JSON-Exports und/oder Python-Skripte
+- **Datenbankschemas** - SQL-Setup-Skripte falls benötigt
+- **Konfigurationsvorlagen** - `.env.example` Dateien
+
+## 🛠️ Entwicklungs-Workflow
+
+### Neuen Workflow hinzufügen
+
+1. Neues Verzeichnis erstellen: `mkdir workflow-name/`
+2. Workflow-Dateien und Dokumentation hinzufügen:
+   - `README.md` - Benutzerdokumentation
+   - `CLAUDE.md` - Entwickleranleitung
+   - Workflow-Implementierungsdateien
+   - Datenbankschemas falls benötigt
+   - Konfigurationsvorlagen
+3. Root README mit Workflow-Zusammenfassung aktualisieren
+4. Root CLAUDE.md bei Bedarf aktualisieren
+
+### Arbeiten mit Claude Code
+
+Jeder Workflow hat seine eigene `CLAUDE.md` Datei mit:
+- Technischen Architekturdetails
+- Wesentlichen Befehlen und Operationen
+- Konfigurationsspezifika
+- Troubleshooting-Anleitungen
+- Entwicklungs-Workflows
+
+Siehe individuelle Workflow-Verzeichnisse für Details.
+
+## 🔧 Allgemeine Operationen
+
+### n8n Workflow Import
+
+```bash
+# 1. n8n Interface öffnen
+# 2. Auf "+" klicken (Neuer Workflow)
+# 3. Auf "..." → "Import from File" klicken
+# 4. Workflow-JSON-Datei auswählen
+# 5. Credentials konfigurieren
+# 6. Workflow aktivieren
+```
+
+### Datenbank-Operationen
+
+```bash
+# Schema importieren
+psql -U postgres -d n8n < workflow-name/database_schema.sql
+
+# Daten sichern
+pg_dump -U postgres -d n8n -t table_name > backup.sql
+
+# Als CSV exportieren
+psql -U postgres -d n8n -c "\COPY table_name TO 'export.csv' CSV HEADER;"
+```
+
+### Python-Skript-Operationen
+
+```bash
+# Virtuelle Umgebung einrichten
+python3 -m venv venv
+source venv/bin/activate  # macOS/Linux
+# venv\Scripts\activate   # Windows
+
+# Dependencies installieren
 pip install -r requirements.txt
-psql -U postgres -d n8n < database_schema.sql
-cp .env.example .env  # Configure your API keys
+
+# Skript ausführen
+python script_name.py --options
 ```
 
-### Usage
+## 📊 Workflow-Vergleich
 
-```bash
-# Python Script
-python lead_generation.py --campaign    # Start new campaign
-python lead_generation.py --followup    # Send follow-ups
-python lead_generation.py --stats       # View statistics
-
-# API + Dashboard
-python api.py                           # Start REST API on :5000
-# Open dashboard.html in browser
-
-# n8n Workflow
-# Import neukoelln_lead_workflow.json in n8n interface
-# Configure credentials and activate workflow
-```
-
-## 📊 Architecture
-
-```
-Google Places API
-       ↓
-Lead Scoring Algorithm (0-100 points)
-       ↓
-Website Analysis
-       ↓
-High-Potential Filter (>40 points)
-       ↓
-GPT-4 Email Generation
-       ↓
-PostgreSQL Storage
-       ↓
-SMTP Delivery (rate-limited)
-       ↓
-Follow-up System
-```
-
-### Lead Scoring Criteria
-
-| Criterion | Points |
-|-----------|--------|
-| High-potential industry (tax, real estate, recruiting, insurance, law) | +30 |
-| Good rating (>4.0 stars) | +10 |
-| Established business (>20 reviews) | +10 |
-| Manual process indicators detected | +5 each |
-| Modern website with automation | -10 |
-
-**Threshold**: Only leads with score >40 receive outreach emails
-
-## 📈 Expected Results
-
-Based on B2B benchmarks for 100 researched companies:
-
-| Metric | Average | With Optimization |
-|--------|---------|-------------------|
-| Qualified Leads | 30-40 | 40-50 |
-| Emails Sent | 20-25 | 25-30 |
-| Open Rate | 30-40% | 40-50% |
-| Response Rate | 5-10% | 10-20% |
-| Meetings Booked | 1-2 | 2-4 |
-| Conversion Rate | ~5% | ~10% |
-
-**Optimization Factors**:
-- LinkedIn research before email: +50% response rate
-- Phone follow-up: +100% response rate
-- Hyper-personalization: +75% response rate
-- Optimal send time (Tue-Thu, 9-11am): +20% open rate
-
-## 🔑 Required API Keys
-
-### Google Maps API
-- **Console**: https://console.cloud.google.com/
-- **APIs to enable**: Places API, Maps JavaScript API
-- **Cost**: ~$17 per 1000 requests (first $200/month free)
-
-### OpenAI API
-- **Dashboard**: https://platform.openai.com/
-- **Model**: gpt-4o-mini (cost-effective)
-- **Cost**: ~$0.50 per 100 emails
-
-### SMTP
-- **Gmail** (testing): smtp.gmail.com:587 with app password
-- **Mailgun** (production): 5000 emails/month free
-- **SendGrid** (production): 100 emails/day free
-- **Amazon SES** (production): Very low cost
-
-## 📁 Project Structure
-
-```
-n8n-plygrnd/
-├── README.md                          # This file
-├── CLAUDE.md                          # Instructions for Claude Code
-├── lead-generator/                    # Main lead generation project
-│   ├── neukoelln_lead_workflow.json  # n8n visual workflow
-│   ├── lead_generation.py            # Python standalone script
-│   ├── api.py                        # Flask REST API
-│   ├── dashboard.html                # Monitoring dashboard
-│   ├── database_schema.sql           # PostgreSQL schema
-│   ├── requirements.txt              # Python dependencies
-│   ├── install.sh                    # Automated setup
-│   ├── setup_cronjobs.sh            # Cronjob automation
-│   ├── README.md                     # Detailed documentation
-│   ├── SETUP_ANLEITUNG.md           # Setup guide (German)
-│   └── QUICK_REFERENCE.md           # Command reference
-├── package.json
-└── index.js
-```
-
-## 📖 Documentation
-
-- **[Detailed README](lead-generator/README.md)** - Complete feature overview and examples
-- **[Setup Guide](lead-generator/SETUP_ANLEITUNG.md)** - Step-by-step installation (German)
-- **[Quick Reference](lead-generator/QUICK_REFERENCE.md)** - Command cheat sheet
-- **[CLAUDE.md](CLAUDE.md)** - Developer guide for Claude Code
-
-## ⚖️ Legal Compliance
-
-### DSGVO (GDPR)
-- Personal data (emails) is processed under legitimate interest (Art. 6 para. 1 lit. f DSGVO)
-- Opt-out option provided in every email
-- Data source documentation included
-- Easy deletion upon request
-
-### UWG (German Unfair Competition Law)
-- B2B cold emails are legally possible but borderline
-- Phone cold calling requires explicit consent
-- Full legal imprint required in every email
-- Maximum 2 follow-ups to avoid spam classification
-
-**Safer Alternatives**: LinkedIn InMail, website contact forms, or phone calls with prior consent
-
-## 🔧 Common Commands
-
-```bash
-# Database queries
-psql -U postgres -d n8n -c "SELECT * FROM leads_email_campaign ORDER BY score DESC LIMIT 10;"
-psql -U postgres -d n8n -c "SELECT * FROM campaign_stats;"
-
-# Test Google API
-curl "https://maps.googleapis.com/maps/api/place/textsearch/json?query=Restaurant&location=52.4797,13.4363&radius=1000&key=YOUR_KEY"
-
-# Test SMTP connection
-python3 -c "import smtplib; s=smtplib.SMTP('smtp.gmail.com',587); s.starttls(); print('OK')"
-
-# Setup cronjobs (automated campaigns)
-cd lead-generator && chmod +x setup_cronjobs.sh && ./setup_cronjobs.sh
-```
-
-## 🛠️ Troubleshooting
-
-### Google API returns no results
-- Check API key and quota in Google Cloud Console
-- Verify Places API is enabled
-- Test with broader search parameters
-
-### Emails not being delivered
-- Verify SMTP credentials
-- Configure SPF/DKIM/DMARC records
-- Start with low volume (5-10/day) to "warm up" domain
-- Test spam score at mail-tester.com
-
-### OpenAI API errors
-- Check account balance at https://platform.openai.com/account/usage
-- Verify rate limits (Tier 1: 500 requests/minute)
-- Add delays between requests if hitting limits
+| Workflow | Typ | Komplexität | Voraussetzungen | Anwendungsfall |
+|----------|------|------------|----------------|----------------|
+| Lead Generator | B2B Automation | Mittel | Google API, OpenAI, SMTP | Automatisierte Kundenakquise |
+| [Workflow 2] | TBD | TBD | TBD | TBD |
+| [Workflow 3] | TBD | TBD | TBD | TBD |
 
 ## 🎓 Best Practices
 
-### Email Campaign Tips
-- Send Tuesday-Thursday between 9-11am for best open rates
-- Personalize based on industry-specific pain points
-- Keep emails under 150 words with clear call-to-action
-- Include full legal imprint and opt-out instructions
-- Limit to 20 emails per day maximum
-- Wait 3 days between follow-ups, max 2 follow-ups total
+### Workflow-Design
+- Workflows modular und eigenständig halten
+- Umfassendes Error-Handling einbauen
+- Logging für Debugging hinzufügen
+- Environment-Variablen für Konfiguration verwenden
+- Rate-Limiting für externe APIs implementieren
 
-### Lead Quality
-- Focus on high-scoring leads (>50 points) first
-- Research decision-makers on LinkedIn before sending
-- Reference specific company details in emails
-- Mention current industry trends or challenges
+### Dokumentation
+- Immer sowohl README.md als auch CLAUDE.md bereitstellen
+- Alle benötigten API-Keys und Credentials dokumentieren
+- Funktionierende Beispiele und Test-Befehle bereitstellen
+- Troubleshooting-Sektion einbeziehen
 
-## 💡 Extension Ideas
+### Versionskontrolle
+- Workflow-JSON-Exports regelmäßig committen
+- Semantic Versioning für Releases verwenden
+- Stabile Versionen taggen
+- Breaking Changes dokumentieren
 
-- **Hunter.io Integration**: Automatic email address discovery
-- **LinkedIn Scraping**: Enrich leads with company and decision-maker data
-- **Webhook System**: Track email opens and clicks in real-time
-- **A/B Testing**: Test different subject lines and CTAs
-- **Multi-channel**: Combine email with LinkedIn messages and phone calls
+## 💡 Mitwirken
+
+Um einen neuen Workflow hinzuzufügen:
+
+1. Workflow-Verzeichnis erstellen
+2. Funktionalität implementieren
+3. Umfassende Dokumentation hinzufügen
+4. Gründlich testen
+5. Pull Request einreichen
 
 ## 📞 Support
 
@@ -254,18 +221,18 @@ cd lead-generator && chmod +x setup_cronjobs.sh && ./setup_cronjobs.sh
 - **n8n Community**: https://community.n8n.io/
 - **Email**: martin.pfeffer@celox.io
 
-## 👨‍💻 Developer
+## 👨‍💻 Entwickler
 
 **Martin Pfeffer**
 [celox.io](https://celox.io) | martin.pfeffer@celox.io
 © 2025
 
-## 📄 License
+## 📄 Lizenz
 
-MIT License - Free to use for commercial projects
+MIT License - Frei verwendbar für kommerzielle Projekte
 
 ---
 
-**Made with ❤️ in Berlin-Neukölln**
+**Made with ❤️ in Berlin**
 
-🚀 Happy lead generating!
+🚀 Viel Erfolg beim Automatisieren!
