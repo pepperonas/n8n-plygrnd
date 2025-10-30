@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is an automated lead generation and email campaign system for identifying mid-sized businesses in Berlin-Neukölln with high AI automation potential. The project offers multiple implementation approaches:
 
-1. **n8n Workflow** - Visual automation workflow (`get-customers/neukoelln_lead_workflow.json`)
-2. **Python Alternative** - Standalone CLI script (`get-customers/lead_generation.py`)
+1. **n8n Workflow** - Visual automation workflow (`lead-generator/neukoelln_lead_workflow.json`)
+2. **Python Alternative** - Standalone CLI script (`lead-generator/lead_generation.py`)
 3. **REST API + Dashboard** - Flask API with HTML monitoring interface
 
 ## Architecture Overview
@@ -39,7 +39,7 @@ Follow-up System
 ### Python Script Operations
 ```bash
 # Navigate to project directory
-cd get-customers/
+cd lead-generator/
 
 # Create virtual environment
 python3 -m venv venv
@@ -66,7 +66,7 @@ python lead_generation.py --stats
 ### Database Setup
 ```bash
 # Create database and schema
-psql -U postgres -d n8n < get-customers/database_schema.sql
+psql -U postgres -d n8n < lead-generator/database_schema.sql
 
 # View leads
 psql -U postgres -d n8n -c "SELECT * FROM leads_email_campaign ORDER BY score DESC LIMIT 10;"
@@ -81,7 +81,7 @@ psql -U postgres -d n8n -c "\COPY (SELECT * FROM leads_email_campaign) TO '/tmp/
 ### API & Dashboard
 ```bash
 # Start Flask API
-cd get-customers/
+cd lead-generator/
 python api.py
 
 # API runs on http://localhost:5000
@@ -92,7 +92,7 @@ python api.py
 
 ### Automated Setup
 ```bash
-cd get-customers/
+cd lead-generator/
 chmod +x install.sh
 ./install.sh
 
@@ -108,7 +108,7 @@ chmod +x setup_cronjobs.sh
 1. Open n8n web interface
 2. Click "+" (New Workflow)
 3. Click "..." → "Import from File"
-4. Select `get-customers/neukoelln_lead_workflow.json`
+4. Select `lead-generator/neukoelln_lead_workflow.json`
 
 ### Required Credentials
 - **Google Maps API**: Places API + Maps JavaScript API enabled
@@ -262,7 +262,7 @@ Ihre Daten werden umgehend aus unserem System gelöscht.
 
 ```
 n8n-plygrnd/
-├── get-customers/
+├── lead-generator/
 │   ├── neukoelln_lead_workflow.json  # n8n visual workflow
 │   ├── lead_generation.py            # Python standalone script
 │   ├── api.py                        # Flask REST API

@@ -46,7 +46,7 @@ git clone https://github.com/pepperonas/n8n-plygrnd.git
 cd n8n-plygrnd
 
 # Navigate to lead generation project
-cd get-customers
+cd lead-generator
 
 # Run automated setup (Linux/macOS)
 chmod +x install.sh
@@ -150,7 +150,7 @@ Based on B2B benchmarks for 100 researched companies:
 n8n-plygrnd/
 ├── README.md                          # This file
 ├── CLAUDE.md                          # Instructions for Claude Code
-├── get-customers/                     # Main lead generation project
+├── lead-generator/                    # Main lead generation project
 │   ├── neukoelln_lead_workflow.json  # n8n visual workflow
 │   ├── lead_generation.py            # Python standalone script
 │   ├── api.py                        # Flask REST API
@@ -168,9 +168,9 @@ n8n-plygrnd/
 
 ## 📖 Documentation
 
-- **[Detailed README](get-customers/README.md)** - Complete feature overview and examples
-- **[Setup Guide](get-customers/SETUP_ANLEITUNG.md)** - Step-by-step installation (German)
-- **[Quick Reference](get-customers/QUICK_REFERENCE.md)** - Command cheat sheet
+- **[Detailed README](lead-generator/README.md)** - Complete feature overview and examples
+- **[Setup Guide](lead-generator/SETUP_ANLEITUNG.md)** - Step-by-step installation (German)
+- **[Quick Reference](lead-generator/QUICK_REFERENCE.md)** - Command cheat sheet
 - **[CLAUDE.md](CLAUDE.md)** - Developer guide for Claude Code
 
 ## ⚖️ Legal Compliance
@@ -203,7 +203,7 @@ curl "https://maps.googleapis.com/maps/api/place/textsearch/json?query=Restauran
 python3 -c "import smtplib; s=smtplib.SMTP('smtp.gmail.com',587); s.starttls(); print('OK')"
 
 # Setup cronjobs (automated campaigns)
-cd get-customers && chmod +x setup_cronjobs.sh && ./setup_cronjobs.sh
+cd lead-generator && chmod +x setup_cronjobs.sh && ./setup_cronjobs.sh
 ```
 
 ## 🛠️ Troubleshooting
@@ -252,7 +252,13 @@ cd get-customers && chmod +x setup_cronjobs.sh && ./setup_cronjobs.sh
 
 - **Issues**: https://github.com/pepperonas/n8n-plygrnd/issues
 - **n8n Community**: https://community.n8n.io/
-- **Email**: martin@celox.io
+- **Email**: martin.pfeffer@celox.io
+
+## 👨‍💻 Developer
+
+**Martin Pfeffer**
+[celox.io](https://celox.io) | martin.pfeffer@celox.io
+© 2025
 
 ## 📄 License
 
