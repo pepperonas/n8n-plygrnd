@@ -1,0 +1,673 @@
+{
+  "name": "Neukölln Lead Generation & Email Campaign",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start-node",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://maps.googleapis.com/maps/api/place/textsearch/json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "queryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "Unternehmen Neukölln Berlin"
+            },
+            {
+              "name": "location",
+              "value": "52.4797,13.4363"
+            },
+            {
+              "name": "radius",
+              "value": "5000"
+            },
+            {
+              "name": "type",
+              "value": "establishment"
+            },
+            {
+              "name": "key",
+              "value": "={{ $credentials.apiKey }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "google-places-search",
+      "name": "Google Places Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300],
+      "notesInFlow": true,
+      "notes": "Sucht Unternehmen in Neukölln via Google Maps API"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lead-Scoring basierend auf Branchen mit hohem Automatisierungspotenzial\nconst items = $input.all();\nconst results = [];\n\nconst highPotentialKeywords = [\n  'steuerberater', 'buchhaltung', 'accounting', 'tax',\n  'immobilien', 'hausverwaltung', 'property',\n  'personaldienstleister', 'recruiting', 'hr',\n  'versicherung', 'insurance',\n  'rechtsanwalt', 'law', 'kanzlei',\n  'marketing', 'werbeagentur', 'agency',\n  'logistik', 'spedition', 'transport',\n  'handwerk', 'handwerker', 'craftsman'\n];\n\nfor (const item of items) {\n  const results_array = item.json.results || [];\n  \n  for (const place of results_array) {\n    let score = 0;\n    const name = (place.name || '').toLowerCase();\n    const types = place.types || [];\n    const businessStatus = place.business_status;\n    \n    // Skip geschlossene Unternehmen\n    if (businessStatus !== 'OPERATIONAL') continue;\n    \n    // Branchen-Scoring\n    for (const keyword of highPotentialKeywords) {\n      if (name.includes(keyword)) {\n        score += 30;\n        break;\n      }\n    }\n    \n    // Rating-Bonus (etabliertes Unternehmen)\n    if (place.rating >= 4.0) score += 10;\n    if (place.user_ratings_total > 20) score += 10;\n    \n    // Nur Unternehmen mit Mindest-Score\n    if (score >= 30) {\n      results.push({\n        json: {\n          name: place.name,\n          address: place.formatted_address,\n          place_id: place.place_id,\n          rating: place.rating,\n          types: types.join(', '),\n          potential_score: score,\n          google_maps_url: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`\n        }\n      });\n    }\n  }\n}\n\n// Sortiere nach Score\nresults.sort((a, b) => b.json.potential_score - a.json.potential_score);\n\n// Limitiere auf Top 50\nreturn results.slice(0, 50);"
+      },
+      "id": "lead-scoring",
+      "name": "Lead Scoring",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "notesInFlow": true,
+      "notes": "Bewertet Leads nach Automatisierungspotenzial"
+    },
+    {
+      "parameters": {
+        "url": "=https://maps.googleapis.com/maps/api/place/details/json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "queryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "place_id",
+              "value": "={{ $json.place_id }}"
+            },
+            {
+              "name": "fields",
+              "value": "name,formatted_phone_number,website,opening_hours,business_status"
+            },
+            {
+              "name": "key",
+              "value": "={{ $credentials.apiKey }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-place-details",
+      "name": "Get Place Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 300],
+      "notesInFlow": true,
+      "notes": "Holt detaillierte Infos inkl. Website & Telefon"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrahiere relevante Details und kombiniere mit vorherigen Daten\nconst item = $input.item;\nconst details = item.json.result || {};\n\nreturn {\n  json: {\n    ...item.json,\n    phone: details.formatted_phone_number || 'nicht verfügbar',\n    website: details.website || 'nicht verfügbar',\n    has_website: !!details.website,\n    is_operational: details.business_status === 'OPERATIONAL'\n  }\n};"
+      },
+      "id": "merge-details",
+      "name": "Merge Details",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.website }}",
+              "operation": "notEqual",
+              "value2": "nicht verfügbar"
+            }
+          ]
+        }
+      },
+      "id": "filter-has-website",
+      "name": "Filter: Has Website",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "notesInFlow": true,
+      "notes": "Nur Unternehmen mit Website"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.website }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "scrape-website",
+      "name": "Scrape Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1450, 200],
+      "notesInFlow": true,
+      "notes": "Lädt die Website für Analyse"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Analysiere Website-Content\nconst item = $input.item;\nconst html = item.json.data || item.json.body || '';\nconst text = html.replace(/<[^>]*>/g, ' ').toLowerCase();\n\n// Suche nach Hinweisen auf manuelle Prozesse\nconst manualProcessIndicators = [\n  'anfrage', 'kontaktformular', 'telefonisch',\n  'manuell', 'persönlich', 'individuelle beratung',\n  'verwaltung', 'buchführung', 'dateneingabe'\n];\n\nlet automationPotential = 0;\nfor (const indicator of manualProcessIndicators) {\n  if (text.includes(indicator)) automationPotential += 5;\n}\n\n// Website-Qualität (modernes Design = weniger Potenzial)\nconst modernTech = ['react', 'vue', 'angular', 'webpack', 'next.js'];\nlet isModern = false;\nfor (const tech of modernTech) {\n  if (text.includes(tech)) {\n    isModern = true;\n    break;\n  }\n}\n\nreturn {\n  json: {\n    ...item.json,\n    automation_potential: automationPotential,\n    website_is_modern: isModern,\n    website_length: text.length,\n    final_score: item.json.potential_score + automationPotential - (isModern ? 10 : 0)\n  }\n};"
+      },
+      "id": "analyze-website",
+      "name": "Analyze Website",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1650, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.final_score }}",
+              "operation": "larger",
+              "value2": 40
+            }
+          ]
+        }
+      },
+      "id": "filter-high-potential",
+      "name": "Filter: High Potential",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1850, 200],
+      "notesInFlow": true,
+      "notes": "Nur Leads mit Score > 40"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.google.com/search?q={{ encodeURIComponent($json.name + ' Neukölln Geschäftsführer') }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "find-decision-maker",
+      "name": "Find Decision Maker",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [2050, 100],
+      "notesInFlow": true,
+      "notes": "Sucht nach Entscheidungsträger (optional)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrahiere potenzielle Entscheidungsträger aus Google-Suche\nconst item = $input.item;\nconst html = item.json.data || item.json.body || '';\n\n// Vereinfachte Regex für Namen (Vorname Nachname)\nconst namePattern = /(?:Geschäftsführer|Inhaber|CEO|Managing Director)[:_\\s]*([A-ZÄÖÜ][a-zäöüß]+\\s+[A-ZÄÖÜ][a-zäöüß]+)/g;\nconst matches = [...html.matchAll(namePattern)];\n\nlet decisionMaker = 'Sehr geehrte Damen und Herren';\nif (matches.length > 0) {\n  const name = matches[0][1];\n  decisionMaker = `Sehr geehrte/r Herr/Frau ${name.split(' ')[1]}`;\n}\n\nreturn {\n  json: {\n    ...item.json,\n    decision_maker: decisionMaker\n  }\n};"
+      },
+      "id": "extract-decision-maker",
+      "name": "Extract Decision Maker",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2250, 100]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "create",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4o Mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Du bist ein professioneller B2B-Sales-Experte für KI-Automatisierungslösungen. Erstelle personalisierte, überzeugende E-Mails für deutsche Mittelständler."
+            },
+            {
+              "role": "user",
+              "content": "=Erstelle eine personalisierte E-Mail für folgendes Unternehmen:\n\nFirmenname: {{ $json.name }}\nBranche: {{ $json.types }}\nWebsite: {{ $json.website }}\nStandort: {{ $json.address }}\nAnrede: {{ $json.decision_maker }}\n\nDie E-Mail soll:\n1. Professionell und auf Augenhöhe sein\n2. Konkrete Automatisierungspotenziale für diese Branche nennen (z.B. Rechnungsverarbeitung, Kundenkommunikation, Terminplanung)\n3. Den Mehrwert klar kommunizieren (Zeitersparnis, Kostenreduktion, Fehlerminimierung)\n4. Eine klare Call-to-Action enthalten (kostenloses Erstgespräch)\n5. Maximal 150 Wörter lang sein\n6. Betreff und Body enthalten (Format: BETREFF: ... | BODY: ...)\n\nAbsender: Martin von celox.io - IT-Dienstleister für KI-Automatisierung in Berlin"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "generate-email",
+      "name": "Generate Personalized Email",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [2450, 100],
+      "notesInFlow": true,
+      "notes": "Generiert personalisierte E-Mail mit GPT-4"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Email-Inhalt\nconst item = $input.item;\nconst emailContent = item.json.message?.content || item.json.choices?.[0]?.message?.content || '';\n\n// Extrahiere Betreff und Body\nconst subjectMatch = emailContent.match(/BETREFF:\\s*(.+?)(?:\\s*\\||$)/i);\nconst bodyMatch = emailContent.match(/BODY:\\s*([\\s\\S]+)/i);\n\nconst subject = subjectMatch ? subjectMatch[1].trim() : 'Potenzial für KI-Automatisierung in Ihrem Unternehmen';\nconst body = bodyMatch ? bodyMatch[1].trim() : emailContent;\n\nreturn {\n  json: {\n    ...item.json,\n    email_subject: subject,\n    email_body: body,\n    email_generated_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "parse-email",
+      "name": "Parse Email Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2650, 100]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "tableId": "leads_email_campaign",
+        "columns": {
+          "mappings": [
+            {
+              "column": "company_name",
+              "value": "={{ $json.name }}"
+            },
+            {
+              "column": "address",
+              "value": "={{ $json.address }}"
+            },
+            {
+              "column": "phone",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "column": "website",
+              "value": "={{ $json.website }}"
+            },
+            {
+              "column": "score",
+              "value": "={{ $json.final_score }}"
+            },
+            {
+              "column": "email_subject",
+              "value": "={{ $json.email_subject }}"
+            },
+            {
+              "column": "email_body",
+              "value": "={{ $json.email_body }}"
+            },
+            {
+              "column": "status",
+              "value": "pending"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $now }}"
+            }
+          ]
+        }
+      },
+      "id": "save-to-database",
+      "name": "Save to Database",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [2850, 100],
+      "notesInFlow": true,
+      "notes": "Speichert Lead in PostgreSQL"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "multiplex",
+        "options": {}
+      },
+      "id": "wait-before-send",
+      "name": "Rate Limiting (Wait)",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [3050, 100],
+      "notesInFlow": true,
+      "notes": "Verhindert Spam-Filter (1 Email alle 2 Min)"
+    },
+    {
+      "parameters": {
+        "fromEmail": "martin@celox.io",
+        "toEmail": "={{ $json.email || 'info@' + $json.website.replace(/^https?:\\/\\/(?:www\\.)?/, '').split('/')[0] }}",
+        "subject": "={{ $json.email_subject }}",
+        "emailType": "html",
+        "message": "={{ $json.email_body }}\n\n---\nMit freundlichen Grüßen,\n\nMartin\ncelox.io - IT-Dienstleistungen\nBerlin\n\nTelefon: [Deine Telefonnummer]\nWeb: https://celox.io",
+        "options": {}
+      },
+      "id": "send-email",
+      "name": "Send Email (SMTP)",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [3250, 100],
+      "notesInFlow": true,
+      "notes": "Versendet E-Mail via SMTP"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE leads_email_campaign SET status = 'sent', sent_at = NOW() WHERE company_name = '{{ $json.name }}'",
+        "options": {}
+      },
+      "id": "update-sent-status",
+      "name": "Update Sent Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [3450, 100]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "daily-followup-check",
+      "name": "Daily Follow-up Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 600],
+      "notesInFlow": true,
+      "notes": "Läuft täglich um 9 Uhr"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM leads_email_campaign WHERE status = 'sent' AND sent_at < NOW() - INTERVAL '3 days' AND followup_count < 2",
+        "options": {}
+      },
+      "id": "get-followup-leads",
+      "name": "Get Follow-up Leads",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [450, 600]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "create",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Erstelle eine kurze, freundliche Follow-up E-Mail für ein Unternehmen, das nicht auf die erste E-Mail geantwortet hat."
+            },
+            {
+              "role": "user",
+              "content": "=Erstelle eine Follow-up E-Mail für {{ $json.company_name }}. Die erste E-Mail hatte den Betreff: {{ $json.email_subject }}.\n\nDie Follow-up soll:\n- Kurz sein (max 80 Wörter)\n- Einen konkreten Mehrwert bieten (z.B. kostenlosen Website-Check)\n- Nicht aufdringlich wirken\n- Format: BETREFF: ... | BODY: ..."
+            }
+          ]
+        }
+      },
+      "id": "generate-followup",
+      "name": "Generate Follow-up",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [650, 600]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item;\nconst emailContent = item.json.message?.content || '';\n\nconst subjectMatch = emailContent.match(/BETREFF:\\s*(.+?)(?:\\s*\\||$)/i);\nconst bodyMatch = emailContent.match(/BODY:\\s*([\\s\\S]+)/i);\n\nreturn {\n  json: {\n    ...item.json,\n    followup_subject: subjectMatch ? subjectMatch[1].trim() : 'Nachfrage',\n    followup_body: bodyMatch ? bodyMatch[1].trim() : emailContent\n  }\n};"
+      },
+      "id": "parse-followup",
+      "name": "Parse Follow-up",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 600]
+    },
+    {
+      "parameters": {
+        "fromEmail": "martin@celox.io",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.followup_subject }}",
+        "emailType": "html",
+        "message": "={{ $json.followup_body }}\n\n---\nMit freundlichen Grüßen,\n\nMartin\ncelox.io"
+      },
+      "id": "send-followup",
+      "name": "Send Follow-up",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 600]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE leads_email_campaign SET followup_count = followup_count + 1, last_followup = NOW() WHERE company_name = '{{ $json.company_name }}'",
+        "options": {}
+      },
+      "id": "update-followup-status",
+      "name": "Update Follow-up Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1250, 600]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Places Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Places Search": {
+      "main": [
+        [
+          {
+            "node": "Lead Scoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Scoring": {
+      "main": [
+        [
+          {
+            "node": "Get Place Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Place Details": {
+      "main": [
+        [
+          {
+            "node": "Merge Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Details": {
+      "main": [
+        [
+          {
+            "node": "Filter: Has Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Has Website": {
+      "main": [
+        [
+          {
+            "node": "Scrape Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Website": {
+      "main": [
+        [
+          {
+            "node": "Analyze Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Website": {
+      "main": [
+        [
+          {
+            "node": "Filter: High Potential",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: High Potential": {
+      "main": [
+        [
+          {
+            "node": "Find Decision Maker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Decision Maker": {
+      "main": [
+        [
+          {
+            "node": "Extract Decision Maker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Decision Maker": {
+      "main": [
+        [
+          {
+            "node": "Generate Personalized Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Personalized Email": {
+      "main": [
+        [
+          {
+            "node": "Parse Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Email Content": {
+      "main": [
+        [
+          {
+            "node": "Save to Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Database": {
+      "main": [
+        [
+          {
+            "node": "Rate Limiting (Wait)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limiting (Wait)": {
+      "main": [
+        [
+          {
+            "node": "Send Email (SMTP)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email (SMTP)": {
+      "main": [
+        [
+          {
+            "node": "Update Sent Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Follow-up Check": {
+      "main": [
+        [
+          {
+            "node": "Get Follow-up Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Follow-up Leads": {
+      "main": [
+        [
+          {
+            "node": "Generate Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Follow-up": {
+      "main": [
+        [
+          {
+            "node": "Parse Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Follow-up": {
+      "main": [
+        [
+          {
+            "node": "Send Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Follow-up": {
+      "main": [
+        [
+          {
+            "node": "Update Follow-up Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 2,
+  "updatedAt": "2025-10-30T00:00:00.000Z",
+  "versionId": "1"
+}

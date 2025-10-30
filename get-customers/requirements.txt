@@ -1,0 +1,36 @@
+# Lead Generation - Python Dependencies
+# Installation: pip install -r requirements.txt
+
+# Core
+requests==2.31.0
+python-dotenv==1.0.0
+
+# OpenAI
+openai==1.12.0
+
+# Database
+psycopg2-binary==2.9.9
+
+# Email
+dnspython==2.4.2
+
+# API (optional - nur für Dashboard)
+flask==3.0.0
+flask-cors==4.0.0
+gunicorn==21.2.0
+
+# Utilities
+python-dateutil==2.8.2
+
+# Optional: Erweiterte E-Mail-Validierung
+email-validator==2.1.0
+
+# Optional: E-Mail-Finder APIs
+# pyhunter==0.6  # Hunter.io Integration
+# clearbit==0.1.7  # Clearbit Integration
+
+# Development
+pytest==7.4.3
+pytest-cov==4.1.0
+black==23.12.1
+flake8==7.0.0
